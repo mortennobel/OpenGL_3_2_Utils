@@ -9,7 +9,7 @@
 ///
 /// Example usage:
 ///	unsigned int width, height;
-///	unsigned char * data = loadBMPRaw(imagepath, &width, &height);
+///	unsigned char * data = loadBMPRaw(imagepath, width, height);
 ///	// Create one OpenGL texture
 ///	GLuint textureID;
 ///	glGenTextures(1, &textureID);
