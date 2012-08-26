@@ -8,7 +8,7 @@ This library add some utility functions to this library for some common tasks in
 
  * Wavefront .obj model loader
  * BMP image loader
- * Select buffer (usefull for selecting objects in a scene).
+ * Select buffer (useful for selecting objects in a scene).
  
 Most of these extensions depends on the "Angel.h", however it should be easy to update the code to use other libraries (such as GLM http://glm.g-truc.net/ ) instead.
 
