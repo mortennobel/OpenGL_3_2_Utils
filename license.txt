@@ -1,7 +1,4 @@
 /*!
- * OpenGL 3.2 Utils - Extension to the Angel library (from the book Interactive Computer Graphics 6th ed
- * https://github.com/mortennobel/OpenGL_3_2_Utils
- *
  * New BSD License
  *
  * Copyright (c) 2011, Morten Nobel-Joergensen
@@ -23,20 +20,3 @@
  * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-#ifndef __OBJ_LOADER_H
-#define __OBJ_LOADER_H
-
-#include <vector>
-#include "Angel.h"
-
-// Load an OBJ model into the out parameters.
-// Note only simple OBJ files are supported.
-bool loadObject(const char * filename, 
-	std::vector<vec3> &outPositions, 
-	std::vector<int> &outIndices,
-	std::vector<vec3> &outNormal = std::vector<vec3>(), 
-	std::vector<vec2> &outUv = std::vector<vec2>(),
-	float scale = 1.0f
-	);
-
-#endif
