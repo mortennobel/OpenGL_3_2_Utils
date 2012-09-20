@@ -29,7 +29,6 @@
 
 // Based on http://www.opengl-tutorial.org/beginners-tutorials/tutorial-5-a-textured-cube/
 
-#include <GL/glew.h>
 
 /// The returned char* must be deleted by the calling function.
 ///
