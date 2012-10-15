@@ -31,6 +31,7 @@
 // The pseudocode for using the Select buffer is as follows:
 //
 // SelectBuffer *selectBuffer;
+// GLuint colorUniform; // should point to the color uniform (vec4) of the current shader
 // void renderScene(bool selectModel){
 //    for each object o in objectsInScene){ 
 //      if (selectModel){
@@ -42,17 +43,18 @@
 //    }
 // }
 // void onMouseClick(int x, int y){
+//   selectBuffer->setColorUniform(colorUniform);
 //   selectBuffer->bind();
 //   renderScene(true);
-//   selectBuffer->release();
 //   int objectId = getId(x, y);
 //   cout << "Found object " << objectId << endl;
+//   selectBuffer->release();
 // }
 //
 // The important part of the pseudocode is to call selectBuffer->setId instead of the setting the color (and change the shader). 
 //
 // Internally the Select buffer uses a FrameBufferObject that writes to a offscrene texture.
-// The select buffer needs a shader with a passthrough shader to be bound where the output
+// The select buffer needs a passthrough shader to be bound where the output
 // color (vec4) can be set using the colorUniform.
 class SelectBuffer {
 public:
