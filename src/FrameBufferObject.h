@@ -48,7 +48,7 @@
 // 
 class FrameBufferObject {
 public:
-    FrameBufferObject(Texture *texture);
+    FrameBufferObject(Texture *texture, bool useDepthBuffer = true);
     ~FrameBufferObject();
     // bind the framebufferobject as current
     void bind();

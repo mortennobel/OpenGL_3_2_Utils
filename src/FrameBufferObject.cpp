@@ -30,17 +30,19 @@
 
 using namespace std;
 
-FrameBufferObject::FrameBufferObject(Texture *texture)
+FrameBufferObject::FrameBufferObject(Texture *texture, bool useDepthBuffer)
 :texture(texture){
     
     
     // create a renderbuffer object to store depth info
     GLuint rboId;
-    glGenRenderbuffers(1, &rboId);
-    glBindRenderbuffer(GL_RENDERBUFFER, rboId);
-    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT,
+    if (useDepthBuffer){
+        glGenRenderbuffers(1, &rboId);
+        glBindRenderbuffer(GL_RENDERBUFFER, rboId);
+        glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT,
                           texture->getWidth(), texture->getHeight());
-    glBindRenderbuffer(GL_RENDERBUFFER, 0);
+        glBindRenderbuffer(GL_RENDERBUFFER, 0);
+    }
     
     // create a framebuffer object
     glGenFramebuffers(1, &framebufferid);
@@ -50,10 +52,13 @@ FrameBufferObject::FrameBufferObject(Texture *texture)
                            GL_TEXTURE_2D, texture->getTextureId(), 0);
     
     // attach the renderbuffer to depth attachment point
-    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT,
+    if (useDepthBuffer){
+        glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT,
                               GL_RENDERBUFFER, rboId);
+    }
     checkFramebufferStatusOk();
 }
+
 
 FrameBufferObject::~FrameBufferObject(){
     glDeleteFramebuffers(1, &framebufferid);
