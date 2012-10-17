@@ -67,7 +67,7 @@ void Texture::renderFullscreenQuad(){
 void Texture::setupRenderFullscreenQuad(){
     drawTextureShader = InitShader("fullscreentexture.vert",  "fullscreentexture.frag", "fragColor");
     GLuint positionAttributeLocation = glGetAttribLocation(drawTextureShader, "position");
-    drawTextureUniform = glGetUniformLocation(drawTextureShader, "texture");
+    drawTextureUniform = glGetUniformLocation(drawTextureShader, "texture1");
     
     glGenVertexArrays(1, &drawTextureVertexArrayObject);
     glBindVertexArray(drawTextureVertexArrayObject);
