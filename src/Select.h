@@ -46,7 +46,7 @@
 //   selectBuffer->setColorUniform(colorUniform);
 //   selectBuffer->bind();
 //   renderScene(true);
-//   int objectId = getId(x, y);
+//   int objectId = selectBuffer->getId(x, y);
 //   cout << "Found object " << objectId << endl;
 //   selectBuffer->release();
 // }
