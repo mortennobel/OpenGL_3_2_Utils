@@ -1,3 +1,29 @@
+/*!
+ * OpenGL 3.2 Utils - Extension to the Angel library (from the book Interactive Computer Graphics 6th ed
+ * https://github.com/mortennobel/OpenGL_3_2_Utils
+ *
+ * New BSD License
+ *
+ * Copyright (c) 2011, Morten Nobel-Joergensen
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without modification, are permitted provided that the
+ * following conditions are met:
+ *
+ * - Redistributions of source code must retain the above copyright notice, this list of conditions and the following
+ * disclaimer.
+ * - Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following
+ * disclaimer in the documentation and/or other materials provided with the distribution.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
+ * INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+ * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+ * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+ * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
 #include "NURBSSurface.h"
 
 #include <iostream>
@@ -28,14 +54,6 @@ NURBSSurface::~NURBSSurface() {
 
 std::vector<vec4> NURBSSurface::getControlPoints(){
 	std::vector<vec4> res;
-
-	if (true){
-		vector<NURBSVector> meshData = getMeshData(); // debug !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-		for (int i=0;i<meshData.size();i++){
-			res.push_back(meshData[i].position);
-		}
-		return res;
-	}
 
 	for (int i=0;i<numberOfControlPointsU;i++){
 		for (int j=0;j<numberOfControlPointsV;j++){
@@ -132,13 +150,7 @@ std::vector<NURBSVector> NURBSSurface::getMeshData(){
 	if (degreeU < 0 || degreeV < 0){
 		return res;
 	}
-
-	for (int i=0;i<numberOfControlPointsU;i++){
-		for (int j=0;j<numberOfControlPointsV;j++){
-			cout << controlPoints[i][j] << endl;
-		}
-	}
-	
+		
 	float minU = knotVectorU[degreeU];
 	float maxU = knotVectorU[knotVectorU.size()-1-degreeU];
 	float deltaU = (maxU - minU) * 0.99999f; // avoid using max value since basis function is not included
@@ -158,7 +170,6 @@ std::vector<NURBSVector> NURBSSurface::getMeshData(){
 				vertex.normal = evaluateNormal(u,v);
 				vertex.uv = vec2(u,v);
 				res.push_back(vertex);
-				cout << vertex.position << endl;
 			}
 		}
 	} else {
@@ -167,14 +178,30 @@ std::vector<NURBSVector> NURBSSurface::getMeshData(){
 	return res;
 }
 
-std::vector<GLuint> NURBSSurface::getMeshDataIndices(){
-	std::vector<GLuint> res;
-	int index = 0;
-	for (int i=getMeshData().size();i >0 ; i--){	
-		res.push_back(index++);		
-	}
+int NURBSSurface::getIndex(int u, int v){
+	return u*vertexCountV+v;
+}
 
-	return res;
+std::vector<GLuint> NURBSSurface::getMeshDataIndices(){
+	std::vector<GLuint> indices;
+	// fill indices
+	for(int i = 0; i < vertexCountU-1; i++){
+		if (i != 0){ // if first vertex, skip degenerate triangle
+			// add degenerate triangle
+			indices.push_back(getIndex(i+1, 0));
+		} 
+		for(int j = 0; j < vertexCountV;++j)
+		{
+			indices.push_back(getIndex(i+1, j));
+			indices.push_back(getIndex(i, j));
+		}
+		if (i<vertexCountU-2){ // if last vertex skip degenerate triangle
+			// add degenerate triangle
+			indices.push_back(getIndex(i, vertexCountV-1));
+		}
+	} 
+
+	return indices;
 }
 
 vec4 NURBSSurface::evaluate(float u, float v){
@@ -203,7 +230,15 @@ vec4 NURBSSurface::evaluate(float u, float v){
 }
 
 vec3 NURBSSurface::evaluateNormal(float u, float v){
-	return vec3();
+	// todo - this should be computed analytical instead (!)
+	float deltaU =  0.1/float(vertexCountU - 1);
+	float deltaV =  0.1/float(vertexCountV - 1);
+	vec4 tangentU = evaluate(min(0.9999f,u+deltaU),v) - evaluate(max(0.0f,u-deltaU),v);
+	vec4 tangentV = evaluate(u,min(0.9999f,v+deltaV)) - evaluate(u,max(0.0f,v-deltaV));
+	vec3 tangentUv3(tangentU.x,tangentU.y,tangentU.z);
+	vec3 tangentVv3(tangentV.x,tangentV.y,tangentV.z);
+
+	return normalize(cross(normalize(tangentVv3), normalize(tangentUv3)));
 }
 
 GLenum NURBSSurface::getPrimitiveType(){

@@ -1,3 +1,29 @@
+/*!
+ * OpenGL 3.2 Utils - Extension to the Angel library (from the book Interactive Computer Graphics 6th ed
+ * https://github.com/mortennobel/OpenGL_3_2_Utils
+ *
+ * New BSD License
+ *
+ * Copyright (c) 2011, Morten Nobel-Joergensen
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without modification, are permitted provided that the
+ * following conditions are met:
+ *
+ * - Redistributions of source code must retain the above copyright notice, this list of conditions and the following
+ * disclaimer.
+ * - Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following
+ * disclaimer in the documentation and/or other materials provided with the distribution.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
+ * INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+ * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+ * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+ * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
 #include "NURBSRenderer.h"
 
 using namespace std;
@@ -66,7 +92,19 @@ vec4 NURBSRenderer::getColor() {
 	return color;
 }
 
-void NURBSRenderer::renderPoints(mat4 &projection, mat4 &modelView, float pointSize){
+void NURBSRenderer::renderNormals(mat4 &projection, mat4 &modelView){
+	if (vaoControlPoints != 0){
+		glUseProgram(shaderProgram);
+		glBindVertexArray(vaoNormals);
+		vec4 black(0,0,0,1); // this disables any light
+		glUniform4fv(colorUniform,1,black);
+		glUniformMatrix4fv(projectionUniform, 1, GL_TRUE, projection);
+		glUniformMatrix4fv(modelViewUniform, 1, GL_TRUE, modelView);
+		glDrawArrays(GL_LINES,0, normalCount);
+	}
+}
+
+void NURBSRenderer::renderControlPoints(mat4 &projection, mat4 &modelView, float pointSize){
 	if (vaoControlPoints != 0){
 		glUseProgram(shaderProgram);
 		glBindVertexArray(vaoControlPoints);
@@ -84,6 +122,7 @@ void NURBSRenderer::render(mat4 &projection, mat4 &modelView, vec4 lightPosition
 		glUseProgram(shaderProgram);
 		glBindVertexArray(vao);
 		glUniform4fv(colorUniform,1,color);
+		glUniform4fv(lightPositionUniform, 1, lightPosition);
 		glUniformMatrix4fv(projectionUniform, 1, GL_TRUE, projection);
 		glUniformMatrix4fv(modelViewUniform, 1, GL_TRUE, modelView);
 		glDrawElements(primitiveType,meshDataIndices.size(),GL_UNSIGNED_INT,&(meshDataIndices[0]));
@@ -98,6 +137,14 @@ void NURBSRenderer::reloadData(){
 	for (int i=0;i<controlPointVertexCount;i++){ // set w to 1 when visualizing the control points
 		controlPoints[i].w = 1.0; 
 	}
+
+	vector<vec4> normals;
+	for (int i=0;i<meshData.size();i++){
+		normals.push_back(meshData[i].position);
+		normals.push_back(meshData[i].position + vec4(meshData[i].normal,0));
+	}
+	normalCount = normals.size();
+
 	vertexCount = meshData.size();
 	meshDataIndices = nurbs->getMeshDataIndices();
 	if (meshData.size() == 0){
@@ -134,12 +181,28 @@ void NURBSRenderer::reloadData(){
 	
 		glEnableVertexAttribArray(positionAttribute);
 		glVertexAttribPointer(positionAttribute, 4, GL_FLOAT, GL_FALSE, sizeof(vec4), (const GLvoid *)0);
+
+		// normals
+		glGenVertexArrays(1, &vaoNormals);
+		glBindVertexArray(vaoNormals);
+	
+		glGenBuffers(1, &normalsVertexBuffer);
+		glBindBuffer(GL_ARRAY_BUFFER, normalsVertexBuffer);
+
+		glBufferData(GL_ARRAY_BUFFER, normals.size() * sizeof(vec4), normals[0], GL_DYNAMIC_DRAW);
+	
+		glEnableVertexAttribArray(positionAttribute);
+		glVertexAttribPointer(positionAttribute, 4, GL_FLOAT, GL_FALSE, sizeof(vec4), (const GLvoid *)0);
+
 	} else {
 		glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
 		glBufferSubData(GL_ARRAY_BUFFER, 0, meshData.size() * sizeof(NURBSVector), meshData[0].position);
 
 		glBindVertexArray(vaoControlPoints);
 		glBufferSubData(GL_ARRAY_BUFFER, 0, controlPoints.size() * sizeof(vec4), controlPoints[0]);
+
+		glBindVertexArray(vaoNormals);
+		glBufferSubData(GL_ARRAY_BUFFER, 0, normals.size() * sizeof(vec4), normals[0]);
 	}
 }
 
