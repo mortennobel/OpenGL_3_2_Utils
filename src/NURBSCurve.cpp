@@ -23,7 +23,6 @@
  * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-
 #include "NURBSCurve.h"
 
 #include <iostream>
@@ -32,8 +31,8 @@
 
 using namespace std;
 
-NURBSCurve::NURBSCurve(int numberOfControlPoints, int vertexCount)
-:numberOfControlPoints(numberOfControlPoints), vertexCount(vertexCount), degree(-1) {
+NURBSCurve::NURBSCurve(int numberOfControlPoints, int discretization)
+:numberOfControlPoints(numberOfControlPoints), discretization(discretization), degree(-1) {
 	controlPoints = new vec4[numberOfControlPoints];
 }
 	
@@ -85,17 +84,17 @@ bool NURBSCurve::setKnotVector(int knotSize, float const * knotVector){
 	return true;
 }
 
-vector<NURBSVector> NURBSCurve::getMeshData(){
-	vector<NURBSVector> res;
+vector<NURBSVertex> NURBSCurve::getMeshData(){
+	vector<NURBSVertex> res;
 	if (degree>=0){
 		float min = knotVector[degree];
 		float max = knotVector[knotVector.size()-1-degree];
 		float delta = (max-min)*0.99999f; // avoid using max value since basis function is not included
 
-		for (int i=0;i<vertexCount;i++){
-			float u = i/float(vertexCount-1);
+		for (int i=0;i<discretization;i++){
+			float u = i/float(discretization-1);
 			u = min + u*delta;
-			NURBSVector v;
+			NURBSVertex v;
 			v.position = evaluate(u);
 			v.uv = vec2(u,u);
 			res.push_back(v);
@@ -109,7 +108,7 @@ vector<NURBSVector> NURBSCurve::getMeshData(){
 vector<GLuint> NURBSCurve::getMeshDataIndices(){
 	vector<GLuint> res;
 	if (degree>=0){
-		for (int i=0;i<vertexCount;i++){
+		for (int i=0;i<discretization;i++){
 			res.push_back(i);
 		}
 	}

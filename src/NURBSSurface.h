@@ -23,7 +23,6 @@
  * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-
 #ifndef _NURBS_SURFACE_H
 #define _NURBS_SURFACE_H
 
@@ -31,10 +30,21 @@
 #include "Angel.h"
 #include "NURBS.h"
 
+/// NURBSSurface represents a NURBS surface path.
+/// Each surface patch object must be given a number of control points for each
+/// point in the u and v direction (the number of control points is specified
+/// in the contructor).
+/// The surface patch also needs a knot vector in a non-decreasing order for 
+/// both the u and v direction. The size of the knot vector must be larger than 
+/// than the number of control points (for the given direction).
+/// The order of the patch for a given direction is knot vector size minus the number 
+/// of control points.
+/// A tesselated mesh is created using the methods getMeshData() and getMeshDataIndices()
+/// An easy way to render the patch is using the NURBSRenderer class.
 class NURBSSurface : public NURBS
 {
 public:
-	NURBSSurface(int numberOfControlPointsU, int numberOfControlPointsV, int vertexCountU = 128, int vertexCountV = 128);
+	NURBSSurface(int numberOfControlPointsU, int numberOfControlPointsV, int discretizationU = 16, int discretizationV = 16);
 	~NURBSSurface();
 	
 	std::vector<vec4> getControlPoints();
@@ -45,9 +55,8 @@ public:
 	/// Set the controlPoint at index, the w-component of the controlpoint is the rational value
 	void setControlPoint(int u, int v, vec4 controlPoint);
 
+	// Get the controlPoint at position u, v
 	vec4 getControlPoint(int u, int v);
-
-
 	
 	// set the knot vector (used for NonUniformBSplines and NonUniformRationalBSplines (NURBS)
 	bool setKnotVectorU(int count, float const * knotVector);
@@ -69,7 +78,8 @@ public:
 	int getDegreeU();
 	int getDegreeV();
 
-	std::vector<NURBSVector> getMeshData();
+	// creates a tesselated mesh
+	std::vector<NURBSVertex> getMeshData();
 	std::vector<GLuint> getMeshDataIndices();
 
 	// evaluate the point based on u (between 0 and 1). Note that the v parameter is not used here.
@@ -77,6 +87,7 @@ public:
 
 	vec3 evaluateNormal(float u, float v);
 
+	// for NURBS Surface always return triangle strips
 	GLenum getPrimitiveType();
 private:
 	int getIndex(int u, int v);
@@ -88,8 +99,8 @@ private:
 	int numberOfControlPointsV;
 	std::vector<float> knotVectorU;
 	std::vector<float> knotVectorV;
-	int vertexCountU;
-	int vertexCountV;
+	int discretizationU;
+	int discretizationV;
 
 	vec4 **controlPoints;
 };

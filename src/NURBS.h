@@ -23,19 +23,19 @@
  * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-
 #ifndef _NURBS_H
 #define _NURBS_H
 
 #include <vector>
 #include "Angel.h"
 
-struct NURBSVector {
+struct NURBSVertex {
 	vec4 position;
 	vec3 normal; // only used for nurbs surface
 	vec2 uv;
 };
 
+/// Abstract class for NURBS objects. 
 class NURBS
 {
 public:
@@ -44,7 +44,7 @@ public:
 
 	// returns a (unsorted) list of controlpoints
 	virtual std::vector<vec4> getControlPoints() = 0;
-	virtual std::vector<NURBSVector> getMeshData() = 0;
+	virtual std::vector<NURBSVertex> getMeshData() = 0;
 	virtual std::vector<GLuint> getMeshDataIndices() = 0;
 
 	// evaluate the point based on uv (between 0 and 1). Note that the v parameter is only used for the NURBSSurface.

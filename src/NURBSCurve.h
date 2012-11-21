@@ -23,7 +23,6 @@
  * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-
 #ifndef _NURBS_CURVE_H
 #define _NURBS_CURVE_H
 
@@ -31,10 +30,22 @@
 #include "Angel.h"
 #include "NURBS.h"
 
+
+/// NURBSCurve represents a NURBS curve.
+/// Each curve object must be given a number of control points for each
+/// point - the number of control points is specified
+/// in the contructor.
+/// The curve object also needs a knot vector in a non-decreasing order.
+/// The size of the knot vector must be larger than than the number of 
+/// control points.
+/// The order of the curve is knot vector size minus the number 
+/// of control points.
+/// A tesselated curve is created using the methods getMeshData() and getMeshDataIndices()
+/// An easy way to render the patch is using the NURBSRenderer class.
 class NURBSCurve : public NURBS
 {
 public:
-	NURBSCurve(int numberOfControlPoints, int vertexCount = 1024);
+	NURBSCurve(int numberOfControlPoints, int discretization = 1024);
 	~NURBSCurve();
 	
 	/// Set the controlPoint at index 
@@ -60,18 +71,19 @@ public:
 
 	std::vector<vec4> getControlPoints();
 
-	std::vector<NURBSVector> getMeshData();
+	std::vector<NURBSVertex> getMeshData();
 	std::vector<GLuint> getMeshDataIndices();
 
 	// evaluate the point based on u (between 0 and 1). Note that the v parameter is not used here.
 	vec4 evaluate(float u, float v = 0);
 
+	// For NURBSCurve always return line_strip
 	GLenum getPrimitiveType();
 private:
 	int degree;
 	int numberOfControlPoints;
 	std::vector<float> knotVector;
-	int vertexCount;
+	int discretization;
 
 	vec4 *controlPoints;
 };

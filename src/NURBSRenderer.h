@@ -23,12 +23,12 @@
  * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-
 #ifndef _NURBSRenderer_H
 #define _NURBSRenderer_H
 
 #include "NURBS.h"
 
+/// Renders a NURBS object
 class NURBSRenderer
 {
 public:
@@ -42,8 +42,10 @@ public:
 	/// If curve, then the light position is ignored
 	void render(mat4 &projection, mat4 &modelView, vec4 lightPosition = vec4(0));
 
+	/// Render the control points
 	void renderControlPoints(mat4 &projection, mat4 &modelView, float pointSize = 5.0f);
 
+	/// Render the normals
 	void renderNormals(mat4 &projection, mat4 &modelView);
 
 	// set the color of the geometry

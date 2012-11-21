@@ -23,7 +23,6 @@
  * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-
 #include "NURBSRenderer.h"
 
 using namespace std;
@@ -131,7 +130,7 @@ void NURBSRenderer::render(mat4 &projection, mat4 &modelView, vec4 lightPosition
 
 void NURBSRenderer::reloadData(){
 	primitiveType = nurbs->getPrimitiveType();
-	vector<NURBSVector> meshData = nurbs->getMeshData();
+	vector<NURBSVertex> meshData = nurbs->getMeshData();
 	vector<vec4> controlPoints = nurbs->getControlPoints();
 	controlPointVertexCount = controlPoints.size();
 	for (int i=0;i<controlPointVertexCount;i++){ // set w to 1 when visualizing the control points
@@ -157,17 +156,17 @@ void NURBSRenderer::reloadData(){
 	
 		glGenBuffers(1, &vertexBuffer);
 		glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
-		glBufferData(GL_ARRAY_BUFFER, meshData.size() * sizeof(NURBSVector), meshData[0].position, GL_DYNAMIC_DRAW);
+		glBufferData(GL_ARRAY_BUFFER, meshData.size() * sizeof(NURBSVertex), meshData[0].position, GL_DYNAMIC_DRAW);
 	
 		glEnableVertexAttribArray(positionAttribute);
-		glVertexAttribPointer(positionAttribute, 4, GL_FLOAT, GL_FALSE, sizeof(NURBSVector), (const GLvoid *)0);
+		glVertexAttribPointer(positionAttribute, 4, GL_FLOAT, GL_FALSE, sizeof(NURBSVertex), (const GLvoid *)0);
 		if (normalAttribute != GL_INVALID_INDEX){
 			glEnableVertexAttribArray(normalAttribute);
-			glVertexAttribPointer(normalAttribute, 3, GL_FLOAT, GL_FALSE, sizeof(NURBSVector), (const GLvoid *)(sizeof(vec4)));
+			glVertexAttribPointer(normalAttribute, 3, GL_FLOAT, GL_FALSE, sizeof(NURBSVertex), (const GLvoid *)(sizeof(vec4)));
 		}
 		if (uvAttribute != GL_INVALID_INDEX){
 			glEnableVertexAttribArray(uvAttribute);
-			glVertexAttribPointer(uvAttribute, 2, GL_FLOAT, GL_FALSE, sizeof(NURBSVector), (const GLvoid *)(sizeof(vec4)+sizeof(vec3)));
+			glVertexAttribPointer(uvAttribute, 2, GL_FLOAT, GL_FALSE, sizeof(NURBSVertex), (const GLvoid *)(sizeof(vec4)+sizeof(vec3)));
 		}
 
 		// control points
@@ -196,7 +195,7 @@ void NURBSRenderer::reloadData(){
 
 	} else {
 		glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
-		glBufferSubData(GL_ARRAY_BUFFER, 0, meshData.size() * sizeof(NURBSVector), meshData[0].position);
+		glBufferSubData(GL_ARRAY_BUFFER, 0, meshData.size() * sizeof(NURBSVertex), meshData[0].position);
 
 		glBindVertexArray(vaoControlPoints);
 		glBufferSubData(GL_ARRAY_BUFFER, 0, controlPoints.size() * sizeof(vec4), controlPoints[0]);

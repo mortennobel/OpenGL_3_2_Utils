@@ -23,7 +23,6 @@
  * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-
 #include "NURBSSurface.h"
 
 #include <iostream>
@@ -31,11 +30,11 @@
 
 using namespace std;
 
-NURBSSurface::NURBSSurface(int numberOfControlPointsU, int numberOfControlPointsV, int vertexCountU, int vertexCountV)
+NURBSSurface::NURBSSurface(int numberOfControlPointsU, int numberOfControlPointsV, int discretizationU, int discretizationV)
 	:numberOfControlPointsU(numberOfControlPointsU),
 	 numberOfControlPointsV(numberOfControlPointsV),
-	 vertexCountU(vertexCountU),
-	 vertexCountV(vertexCountV),
+	 discretizationU(discretizationU),
+	 discretizationV(discretizationV),
 	 degreeU(-1),
 	 degreeV(-1)
 {
@@ -145,8 +144,8 @@ int NURBSSurface::getDegreeV(){
 	return degreeV; 
 }
 
-std::vector<NURBSVector> NURBSSurface::getMeshData(){
-	vector<NURBSVector> res;
+std::vector<NURBSVertex> NURBSSurface::getMeshData(){
+	vector<NURBSVertex> res;
 	if (degreeU < 0 || degreeV < 0){
 		return res;
 	}
@@ -159,13 +158,13 @@ std::vector<NURBSVector> NURBSSurface::getMeshData(){
 	float deltaV = (maxV - minV) * 0.99999f; // avoid using max value since basis function is not included
 
 	if (degreeU >=0 && degreeV >=0){
-		for (int i=0;i<vertexCountU;i++){
-			for (int j=0;j<vertexCountV;j++){
-				float u = i/float(vertexCountU-1);
-				float v = j/float(vertexCountV-1);
+		for (int i=0;i<discretizationU;i++){
+			for (int j=0;j<discretizationV;j++){
+				float u = i/float(discretizationU-1);
+				float v = j/float(discretizationV-1);
 				u = minU + u*deltaU;
 				v = minV + v*deltaV;
-				NURBSVector vertex;
+				NURBSVertex vertex;
 				vertex.position = evaluate(u,v);
 				vertex.normal = evaluateNormal(u,v);
 				vertex.uv = vec2(u,v);
@@ -179,28 +178,28 @@ std::vector<NURBSVector> NURBSSurface::getMeshData(){
 }
 
 int NURBSSurface::getIndex(int u, int v){
-	return u*vertexCountV+v;
+	return u*discretizationV+v;
 }
 
 std::vector<GLuint> NURBSSurface::getMeshDataIndices(){
 	std::vector<GLuint> indices;
 	// fill indices
-	for(int i = 0; i < vertexCountU-1; i++){
+	for(int i = 0; i < discretizationU-1; i++){
 		if (i != 0){ // if first vertex, skip degenerate triangle
 			// add degenerate triangle
 			indices.push_back(getIndex(i+1, 0));
 		} 
-		for(int j = 0; j < vertexCountV;++j)
+		for(int j = 0; j < discretizationV;++j)
 		{
 			indices.push_back(getIndex(i+1, j));
 			indices.push_back(getIndex(i, j));
 		}
-		if (i<vertexCountU-2){ // if last vertex skip degenerate triangle
+		if (i<discretizationU-2){ // if last vertex skip degenerate triangle
 			// add degenerate triangle
-			indices.push_back(getIndex(i, vertexCountV-1));
+			indices.push_back(getIndex(i, discretizationV-1));
 		}
 	} 
-
+	
 	return indices;
 }
 
@@ -231,8 +230,8 @@ vec4 NURBSSurface::evaluate(float u, float v){
 
 vec3 NURBSSurface::evaluateNormal(float u, float v){
 	// todo - this should be computed analytical instead (!)
-	float deltaU =  0.1/float(vertexCountU - 1);
-	float deltaV =  0.1/float(vertexCountV - 1);
+	float deltaU =  0.1/float(discretizationU - 1);
+	float deltaV =  0.1/float(discretizationV - 1);
 	vec4 tangentU = evaluate(min(0.9999f,u+deltaU),v) - evaluate(max(0.0f,u-deltaU),v);
 	vec4 tangentV = evaluate(u,min(0.9999f,v+deltaV)) - evaluate(u,max(0.0f,v-deltaV));
 	vec3 tangentUv3(tangentU.x,tangentU.y,tangentU.z);
