@@ -103,7 +103,7 @@ void SelectBuffer::bind(){
 	glBindFramebuffer(GL_FRAMEBUFFER, framebufferObjectId);
 	glViewport(0,0,width,height);
 	glClearColor(0.0, 0.0, 0.0, 0.0);
-	glClear(GL_COLOR_BUFFER_BIT);
+	glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
 }
 
 void SelectBuffer::release(){
